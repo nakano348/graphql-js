@@ -24,6 +24,7 @@ import type {
   EnumValueDefinitionNode,
   InputObjectTypeDefinitionNode,
   ObjectTypeExtensionNode,
+  InterfaceTypeExtensionNode,
   OperationDefinitionNode,
   FieldNode,
   FragmentDefinitionNode,
@@ -424,7 +425,7 @@ export class GraphQLObjectType {
   name: string;
   description: ?string;
   astNode: ?ObjectTypeDefinitionNode;
-  extensionASTNodes: Array<ObjectTypeExtensionNode>;
+  extensionASTNodes: ?Array<ObjectTypeExtensionNode>;
   isTypeOf: ?GraphQLIsTypeOfFn<*, *>;
 
   _typeConfig: GraphQLObjectTypeConfig<*, *>;
@@ -436,7 +437,7 @@ export class GraphQLObjectType {
     this.name = config.name;
     this.description = config.description;
     this.astNode = config.astNode;
-    this.extensionASTNodes = config.extensionASTNodes || [];
+    this.extensionASTNodes = config.extensionASTNodes;
     if (config.isTypeOf) {
       invariant(
         typeof config.isTypeOf === 'function',
@@ -486,20 +487,6 @@ function defineInterfaces(
     `${type.name} interfaces must be an Array or a function which returns ` +
       'an Array.',
   );
-
-  const implementedTypeNames = Object.create(null);
-  interfaces.forEach(iface => {
-    invariant(
-      iface instanceof GraphQLInterfaceType,
-      `${type.name} may only implement Interface types, it cannot ` +
-        `implement: ${String(iface)}.`,
-    );
-    invariant(
-      !implementedTypeNames[iface.name],
-      `${type.name} may declare it implements ${iface.name} only once.`,
-    );
-    implementedTypeNames[iface.name] = true;
-  });
   return interfaces;
 }
 
@@ -706,6 +693,7 @@ export class GraphQLInterfaceType {
   name: string;
   description: ?string;
   astNode: ?InterfaceTypeDefinitionNode;
+  extensionASTNodes: ?Array<InterfaceTypeExtensionNode>;
   resolveType: ?GraphQLTypeResolver<*, *>;
 
   _typeConfig: GraphQLInterfaceTypeConfig<*, *>;
@@ -716,6 +704,7 @@ export class GraphQLInterfaceType {
     this.name = config.name;
     this.description = config.description;
     this.astNode = config.astNode;
+    this.extensionASTNodes = config.extensionASTNodes;
     if (config.resolveType) {
       invariant(
         typeof config.resolveType === 'function',
@@ -756,6 +745,7 @@ export type GraphQLInterfaceTypeConfig<TSource, TContext> = {
   resolveType?: ?GraphQLTypeResolver<TSource, TContext>,
   description?: ?string,
   astNode?: ?InterfaceTypeDefinitionNode,
+  extensionASTNodes?: ?Array<InterfaceTypeExtensionNode>,
 };
 
 /**

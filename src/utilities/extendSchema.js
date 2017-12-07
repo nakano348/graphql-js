@@ -191,9 +191,10 @@ export function extendSchema(
   );
 
   // Get the root Query, Mutation, and Subscription object types.
-  const queryType = definitionBuilder.buildObjectType(
-    schema.getQueryType().name,
-  );
+  const existingQueryType = schema.getQueryType();
+  const queryType = existingQueryType
+    ? definitionBuilder.buildObjectType(existingQueryType.name)
+    : null;
 
   const existingMutationType = schema.getMutationType();
   const mutationType = existingMutationType
@@ -264,7 +265,9 @@ export function extendSchema(
     const name = type.name;
     let extensionASTNodes = type.extensionASTNodes;
     if (typeExtensionsMap[name]) {
-      extensionASTNodes = extensionASTNodes.concat(typeExtensionsMap[name]);
+      extensionASTNodes = extensionASTNodes
+        ? extensionASTNodes.concat(typeExtensionsMap[name])
+        : typeExtensionsMap[name];
     }
 
     return new GraphQLObjectType({

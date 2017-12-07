@@ -393,7 +393,13 @@ export function getOperationRootType(
 ): GraphQLObjectType {
   switch (operation.operation) {
     case 'query':
-      return schema.getQueryType();
+      const queryType = schema.getQueryType();
+      if (!queryType) {
+        throw new GraphQLError('Schema is not configured for queries', [
+          operation,
+        ]);
+      }
+      return queryType;
     case 'mutation':
       const mutationType = schema.getMutationType();
       if (!mutationType) {
